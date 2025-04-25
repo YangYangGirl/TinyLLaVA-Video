@@ -78,6 +78,7 @@ class TrainingArguments(transformers.TrainingArguments):
     lora_weight_path: str = ""
     lora_bias: str = "none"
     mm_projector_lr: Optional[float] = None
+    group: int = 16 
     group_by_modality_length: bool = field(default=False)
     vision_tower_lr: Optional[float] = None
     pretrained_model_path: Optional[str] = field(default=None)

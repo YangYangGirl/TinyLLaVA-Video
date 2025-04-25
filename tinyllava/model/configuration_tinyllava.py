@@ -109,7 +109,6 @@ class TinyLlavaConfig(PretrainedConfig):
         self.vocab_size = getattr(self.text_config, 'vocab_size',  None)
     
     
-    
     def _load_vision_config(self, vision_config=None):
         if self.vision_model_name_or_path is None or self.vision_model_name_or_path == '':
             self.vision_config = CONFIG_MAPPING['clip_vision_model'](

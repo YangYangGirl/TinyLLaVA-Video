@@ -11,6 +11,7 @@ import math
 class PerceiverResampler(nn.Module):
     def __init__(self, config):
         super().__init__()
+        config.group = 16
         num_q = int(config.num_queries / config.group)
         dim = config.hidden_size #2560
         depth = config.num_resampler_layers #3
