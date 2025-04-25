@@ -1,26 +1,27 @@
 #!/bin/bash
-# if [ $# -ne 13 ]; then
-#     echo "Usage: $0 <VIDEO_DATA_PATH> <VIDEO_PATH> <LLM_VERSION> <VT_VERSION> <VT_VERSION2> <CN_VERSION> <CONV_VERSION> <VERSION> <TRAIN_RECIPE> <MODEL_MAX_LENGTH> <NUM_FRAME> <NUM_QUERY> <GROUP>"
-#     exit 1
-# fi
+if [ $# -ne 13 ]; then
+    echo "Usage: $0 <VIDEO_DATA_PATH> <VIDEO_PATH> <LLM_VERSION> <VT_VERSION> <VT_VERSION2> <CN_VERSION> <CONV_VERSION> <VERSION> <TRAIN_RECIPE> <MODEL_MAX_LENGTH> <NUM_FRAME> <NUM_QUERY> <GROUP>"
+    exit 1
+fi
 
 # Assign the arguments to variables
-VIDEO_DATA_PATH="${HF_HOME}/data/nba_ov"
-VIDEO_PATH="${HF_HOME}/data/nba_ov/0_60_s_nba/nba_videos_meta_reason_train_converted.json"
-LLM_VERSION=${HF_HOME}/checkpoints/Qwen2.5-3B # llm path
-VT_VERSION=${HF_HOME}/checkpoints/siglip-so400m-patch14-384 # vision tower path
-VT_VERSION2=""
-CN_VERSION=groupresampler
-CONV_VERSION=qwen2_base
-VERSION=base
-TRAIN_RECIPE=common
-MODEL_MAX_LENGTH=3072
-NUM_FRAME=16
-NUM_QUERY=512
-GROUP=16
+VIDEO_DATA_PATH="$1"
+VIDEO_PATH="$2"
+LLM_VERSION="$3"
+VT_VERSION="$4"
+VT_VERSION2="$5"
+CN_VERSION="$6"
+CONV_VERSION="$7"
+VERSION="${8}"
+TRAIN_RECIPE="${9}"
+MODEL_MAX_LENGTH="${10}"
+NUM_FRAME="${11}"
+NUM_QUERY="${12}"
+GROUP="${13}"
 
 VT_VARIANT="${VT_VERSION##*/}"
 LLM_VARIANT="${LLM_VERSION##*/}"
+
 
 deepspeed --include localhost:0,1,2,3 --master_port 29501 tinyllava/train/train.py \
     --deepspeed ./scripts/zero3.json \
@@ -38,7 +39,7 @@ deepspeed --include localhost:0,1,2,3 --master_port 29501 tinyllava/train/train.
     --mm_vision_select_layer -2 \
     --image_aspect_ratio square \
     --attn_implementation flash_attention_2 \
-    --bf16 True \
+    --fp16 True \
     --training_recipe $TRAIN_RECIPE \
     --tune_type_llm full \
     --tune_type_vision_tower frozen \

@@ -1,9 +1,17 @@
 #!/bin/bash
-# if [ $# -ne 13 ]; then
-#     echo "Usage: $0 <VIDEO_DATA_PATH> <VIDEO_PATH> <LLM_VERSION> <VT_VERSION> <VT_VERSION2> <CN_VERSION> <CONV_VERSION> <VERSION> <TRAIN_RECIPE> <MODEL_MAX_LENGTH> <NUM_FRAME> <NUM_QUERY> <GROUP>"
-#     exit 1
-# fi
+#SBATCH --account=OD-227441
+#SBATCH --job-name=train_qwen2_sft
+#SBATCH --output=slurm_outputs/train_qwen2_sft_nba.out
+#SBATCH --error=slurm_outputs/train_qwen2_sft_nba.err
+#SBATCH --time=1-00:00:00
+#SBATCH --mem=500G
+#SBATCH --gres=gpu:4
+#SBATCH --cpus-per-task=32
 
+# === Setup your environment ===
+conda activate video_ruler
+
+# === Run your training script ===
 # Assign the arguments to variables
 VIDEO_DATA_PATH="${HF_HOME}/data/nba_ov"
 VIDEO_PATH="${HF_HOME}/data/nba_ov/0_60_s_nba/nba_videos_meta_reason_train_converted.json"
@@ -45,8 +53,8 @@ deepspeed --include localhost:0,1,2,3 --master_port 29501 tinyllava/train/train.
     --tune_vision_tower_from_layer 0 \
     --tune_type_connector full \
     --group_by_modality_length False \
-    --pretrained_model_path /data/vlm/zxj/result/llava_video_factory/tiny-llava-${LLM_VARIANT}-${VT_VARIANT}-${VERSION}-pretrain \
-    --output_dir /data/vlm/zxj/result/llava_video_factory/tiny-llava-${LLM_VARIANT}-${VT_VARIANT}-${VERSION}-finetune \
+    --pretrained_model_path ${HF_HOME}/checkpoints/TinyLLaVA-Video-Qwen2.5-3B-Group-16-512 \
+    --output_dir ${HF_HOME}/checkpoints/sft/tiny-llava-${LLM_VARIANT}-${VT_VARIANT}-${VERSION}-nba \
     --num_train_epochs 1 \
     --per_device_train_batch_size 8 \
     --per_device_eval_batch_size 4 \
